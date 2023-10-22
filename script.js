@@ -5,6 +5,7 @@ let searchForm = $("#search-form");
 let searchHistory = [];
 let searchHistoryContainer = $("#history");
 let todayContainer = $("#today");
+let forecastContainer = $("#forecast");
 const weatherAPIURL = "https://api.openweathermap.org";
 const weatherAPIKey = "f6e9363350029ec2bfab3e53505ac9c5";
 //
@@ -70,6 +71,22 @@ function renderCurrentWeather(city, weatherData) {
   todayContainer.append(card);
 }
 
+function renderForecast(weatherData) {
+  let headingCol = $("<div>");
+  let heading = $("<h4>");
+
+  headingCol.attr("class", "col-12");
+  heading.text("5-day forecast");
+  headingCol.append(heading);
+
+  forecastContainer.html("");
+  forecastContainer.append(headingCol);
+
+  weatherData.filter(function (forecast) {
+    return forecastContainer.dt_txt.include("12");
+  });
+}
+
 function fetchWeather(location) {
   let latitude = location.lat;
   let longitude = location.lon;
@@ -83,7 +100,7 @@ function fetchWeather(location) {
     method: "GET",
   }).then(function (response) {
     renderCurrentWeather(city, response.list[0]);
-    // renderForecast(data.list);
+    renderForecast(response.list);
   });
 }
 
@@ -119,5 +136,16 @@ function submitSearchForm(event) {
   searchInput.val("");
 }
 
+function checkSearchHistory(event) {
+  if (!$(event.target).hasClass("btn-history")) {
+    return;
+  }
+  let search = $(event.target).attr("data-search");
+
+  fetchCoordinates(search);
+  searchInput.val("");
+}
+
 initializeHistory();
 searchForm.on("submit", submitSearchForm);
+searchHistoryContainer.on("click", checkSearchHistory);
